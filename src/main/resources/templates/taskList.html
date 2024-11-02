@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org/">
+<head>
+    <meta charset="UTF-8">
+    <title>任务列表</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" th:href="@{/layui-v2.8.17/layui/css/layui.css}"/>
+    <script type="text/javascript" th:src="@{/layui-v2.8.17/layui/layui.js}"></script>
+
+    <style>
+        table{
+            border-collapse: collapse;
+        }
+        td, th{
+            border: 1px solid;
+        }
+    </style>
+</head>
+<body>
+
+<div style="padding: 16px;">
+    <button class="layui-btn layui-btn-sm" id="btn_logout">退出</button>
+    <table class="layui-hide" id="taskListTable" lay-filter="taskListTableFilter"></table>
+</div>
+
+<script type="text/html" id="taskListToolbar">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm layui-bg-blue" lay-event="createTaskEvent">新建任务</button>
+<!--        <button class="layui-btn layui-btn-sm" lay-event="startTaskEvent">启动选中任务</button>-->
+<!--        <button class="layui-btn layui-btn-sm layui-bg-red" lay-event="stopTaskEvent">停止选中任务</button>-->
+<!--        <button class="layui-btn layui-btn-sm layui-bg-orange" lay-event="deleteTaskEvent">删除选中任务</button>-->
+    </div>
+</script>
+<script type="text/html" id="taskOpBar">
+    <div class="layui-clear-space">
+        <a class="layui-btn layui-btn-xs" lay-event="startTaskEvent">启动</a>
+        <a class="layui-btn layui-btn-xs layui-bg-red" lay-event="stopTaskEvent">停止</a>
+        <a class="layui-btn layui-btn-xs" lay-event="moreEvent">
+            更多
+            <i class="layui-icon layui-icon-down"></i>
+        </a>
+    </div>
+</script>
+<script type="text/html" id="taskDetailLayer">
+    <div class="layui-clear-space">
+            详情
+    </div>
+</script>
+<script type="text/html" id="taskStatusMark">
+    <span  {{= (d.executeStatus==null)? "":"hidden"}}><i class="layui-icon layui-icon-circle" style="font-size: 30px; color: #eeeeee;"></i></span>
+    <span  {{= d.executeStatus==0? "":"hidden"}}><i class="layui-icon layui-icon-circle" style="font-size: 30px; color: #eeeeee;"></i></span>
+    <span  {{= d.executeStatus==1? "":"hidden"}}><i class="layui-icon layui-icon-circle-dot" style="font-size: 30px; color: #16b777;"></i></span>
+    <span  {{= d.executeStatus>1? "":"hidden"}}><i class="layui-icon layui-icon-circle-dot" style="font-size: 30px; color: #16b777;"></i></span>
+    <span  {{= (d.executeStatus==-1)? "":"hidden"}}><i class="layui-icon layui-icon-close-fill" style="font-size: 30px; color: #ff5722;"></i></span>
+</script>
+<script>
+
+
+    function startTask(uuid, okCallback, failCallback){
+        // 创建 XMLHttpRequest，相当于打开浏览器
+        const xhr = new XMLHttpRequest();
+        // 打开一个与网址之间的连接   相当于输入网址
+        // 利用open（）方法，第一个参数是对数据的操作，第二个是接口
+        xhr.open("GET", "/api/task/start?taskUUID="+uuid);
+        // 通过连接发送请求  相当于点击回车或者链接
+        xhr.send();
+        // 指定 xhr 状态变化事件处理函数   相当于处理网页呈现后的操作
+        // 全小写
+        xhr.onreadystatechange = function () {
+            // 通过readyState的值来判断获取数据的情况
+            if (this.readyState === XMLHttpRequest.DONE) {
+
+                // 响应体的文本 responseText
+                // console.log(this.responseText, this.response);
+                // layer.alert(this.responseText);
+                if (this.status == 200){
+                    let responseObj = JSON.parse(this.responseText);
+                    if (responseObj.success){
+                        okCallback(responseObj);
+                    }else {
+                        failCallback(this.responseText);
+                    }
+                }else {
+                    failCallback(this.responseText);
+                }
+
+            }
+        };
+    }
+    function stopTask(uuid, okCallback, failCallback){
+        // 创建 XMLHttpRequest，相当于打开浏览器
+        const xhr = new XMLHttpRequest();
+        // 打开一个与网址之间的连接   相当于输入网址
+        // 利用open（）方法，第一个参数是对数据的操作，第二个是接口
+        xhr.open("GET", "/api/task/stop?taskUUID="+uuid);
+        // 通过连接发送请求  相当于点击回车或者链接
+        xhr.send();
+        // 指定 xhr 状态变化事件处理函数   相当于处理网页呈现后的操作
+        // 全小写
+        xhr.onreadystatechange = function () {
+            // 通过readyState的值来判断获取数据的情况
+            if (this.readyState === XMLHttpRequest.DONE) {
+                if (this.status == 200){
+                    let responseObj = JSON.parse(this.responseText);
+                    if (responseObj.success){
+                        okCallback(responseObj);
+                    }else {
+                        failCallback(this.responseText);
+                    }
+                }else {
+                    failCallback(this.responseText);
+                }
+            }
+
+        };
+    }
+    function deleteTask(uuid, okCallback, failCallback){
+        // 创建 XMLHttpRequest，相当于打开浏览器
+        const xhr = new XMLHttpRequest();
+        // 打开一个与网址之间的连接   相当于输入网址
+        // 利用open（）方法，第一个参数是对数据的操作，第二个是接口
+        xhr.open("GET", "/api/task/remove?taskUUID="+uuid);
+        // 通过连接发送请求  相当于点击回车或者链接
+        xhr.send();
+        // 指定 xhr 状态变化事件处理函数   相当于处理网页呈现后的操作
+        // 全小写
+        xhr.onreadystatechange = function () {
+            // 通过readyState的值来判断获取数据的情况
+            if (this.readyState === XMLHttpRequest.DONE) {
+                // 响应体的文本 responseText
+                console.log(this.responseText);
+                // layer.alert(this.responseText);
+
+                if (this.status == 200){
+                    let responseObj = JSON.parse(this.responseText);
+                    if (responseObj.success){
+                        okCallback(responseObj);
+                    }else {
+                        failCallback(this.responseText);
+                    }
+                }else {
+                    failCallback(this.responseText);
+                }
+            }
+        };
+    }
+
+    layui.use(['table', 'dropdown'], function(){
+        var table = layui.table;
+        var dropdown = layui.dropdown;
+        var layer = layui.layer;
+        var util = layui.util;
+
+        var btn_logout = document.querySelector('#btn_logout');
+        btn_logout.onclick = function(){
+            util.openWin({
+                'url': '/console/logout',
+                'target': '_self'
+            });
+        }
+
+        // 创建渲染实例
+        table.render({
+            elem: '#taskListTable',
+            id: 'taskListTableId',
+            url: '/api/task/list',
+            toolbar: '#taskListToolbar',
+            // defaultToolbar: ['filter', 'exports', 'print', {
+            //     title: '提示',
+            //     layEvent: 'LAYTABLE_TIPS',
+            //     icon: 'layui-icon-tips'
+            // }],
+            // height: 'full-35', // 最大高度减去其他容器已占有的高度差
+            // cellMinWidth: 10,
+            // lineStyle: 'height: 200px;',
+            page: true,
+            css: [ // 重设当前表格样式
+                '.layui-table-tool-temp{padding-right: 145px;}',
+                // '.layui-table-cell {line-height: 20px !important;vertical-align: middle;height: auto;overflow: visible;text-overflow: inherit;white-space: normal;}',
+                '.layui-table-cell {height: auto ;white-space: normal;word-wrap:break-word;}'
+            ].join(''),
+            cols: [  [
+                {type: 'checkbox'},
+
+                {field:'id',
+                    templet: function(task){return task.id; },
+                    width: 30, title: 'ID'},
+                {field:'uuid', hide: true,
+                    templet: function(task){return task.uuid; },
+                    title: 'UUID'},
+                {field:'lutaBinlogChannel.name',
+                    templet: function(task){return task.lutaBinlogChannel.name; },
+                    title: '名称'},
+                {field:'lutaBinlogChannel.description', hide: true,
+                    templet: function(task){return task.lutaBinlogChannel.description?task.lutaBinlogChannel.description:""; },
+                    title: '描述'},
+                {field:'lutaBinlogChannel.id',hide: true,
+                    templet: function(task){return task.lutaBinlogChannel.id; },
+                    width: 75, title: '配置ID'},
+
+                {field:'lutaBinlogChannel.srcDriverClassName', hide: true,
+                    templet: function(task){return task.lutaBinlogChannel.srcDriverClassName; },
+                    title: 'MySQL驱动'},
+                {field:'lutaBinlogChannel.srcHost',
+                    templet: function(task){return task.lutaBinlogChannel.srcHost; },
+                    title: 'MySQL IP/域名'},
+                {field:'lutaBinlogChannel.srcPort', hide: true,
+                    templet: function(task){return task.lutaBinlogChannel.srcPort; },
+                    title: 'MySQL 端口'},
+                {field:'lutaBinlogChannel.srcUsername', hide: true,
+                    templet: function(task){return task.lutaBinlogChannel.srcUsername; },
+                    title:'MySQL 用户名 '},
+                {field:'lutaBinlogChannel.srcBinlogFilename', hide: true,
+                    templet: function(task){return task.lutaBinlogChannel.srcBinlogFilename; },
+                    title:'初始配置的Binlog文件名 '},
+                {field:'lutaBinlogChannel.srcBinlogNextPosition', hide: true,
+                    templet: function(task){return task.lutaBinlogChannel.srcBinlogNextPosition; },
+                    title: '初始配置的Binlog文件NextPosition'},
+                {field:'lutaBinlogChannel.remoteMysqlTimezone', hide: true,
+                    templet: function(task){return task.lutaBinlogChannel.remoteMysqlTimezone; },
+                    title: '远端MySQL时区'},
+                {field:'lutaBinlogChannel.dstHost', hide: true,
+                    templet: function(task){return task.lutaBinlogChannel.dstHost; },
+                    title: 'RabbitMQ IP/域名'},
+                {field:'lutaBinlogChannel.dstPort', hide: true,
+                    templet: function(task){return task.lutaBinlogChannel.dstPort; },
+                    title: 'RabbitMQ 端口'},
+                {field:'lutaBinlogChannel.dstVhost', hide: true,
+                    templet: function(task){return task.lutaBinlogChannel.dstVhost; },
+                    title: 'RabbitMQ vHost'},
+                {field:'lutaBinlogChannel.dstUsername', hide: true,
+                    templet: function(task){return task.lutaBinlogChannel.dstUsername; },
+                    title: 'RabbitMQ 用户名'},
+                {field:'lutaBinlogChannel.dstTopicName', hide: true,
+                    templet: function(task){return task.lutaBinlogChannel.dstTopicName; },
+                    title: 'RabbitMQ Exchange'},
+                {field:'lutaBinlogChannel.dstRoutingKey', hide: true,
+                    templet: function(task){return task.lutaBinlogChannel.dstRoutingKey; },
+                    title: 'RabbitMQ RoutingKey'},
+                {field:'lutaBinlogChannel.creatTime', hide: true,
+                    templet: function(task){return task.lutaBinlogChannel.createTime!=null?task.lutaBinlogChannel.createTime:""; },
+                    title: '创建时间'},
+                {field:'lutaBinlogChannel.updateTime',hide: true,
+                    templet: function(task){return task.lutaBinlogChannel.updateTime?task.lutaBinlogChannel.updateTime:null; },
+                    title: '更新时间'},
+                // {field:'executeStatus',
+                //     templet: function(task){return task.executeStatus; },
+                //     width: 75, title: '状态'},
+                {
+                    templet: '#taskStatusMark',
+                    width: 80, title: '状态'},
+                {field:'executeMessage',
+                    templet: function(task){return task.executeMessage?task.executeMessage:""; },
+                    title: '错误信息'},
+                {field:'executeNode', hide: true,
+                    templet: function(task){return task.executeNode; },
+                    title: '运行节点'},
+                {field:'executeStartTime', hide: true,
+                    templet: function(task){return task.executeStartTime?task.executeStartTime:""; },
+                    title: '开始运行时间'},
+                {field:'executeStopTime', hide: true,
+                    templet: function(task){return task.executeStopTime?task.executeStopTime:""; },
+                    title: '停止运行时间'},
+                {field:'heartbeatTimestamp', hide: true,
+                    templet: function(task){return task.heartbeatTimestamp?task.heartbeatTimestamp:""; },
+                    title: '心跳时间'},
+                {field:'lastEventTime',
+                    templet: function(task){return task.lastEventTime?task.lastEventTime:""; },
+                    title: '上一次BinlogEvent时间'},
+                {field:'lastOutputTrxTime', hide: true,
+                    templet: function(task){return task.lastOutputTrxTime?task.lastOutputTrxTime:""; },
+                    title: '上一个事务输出时间'},
+                {field:'lastOutputTrx', hide: true,
+                    templet: function(task){return task.lastOutputTrx?task.lastOutputTrx:""; },
+                    title: '上一个事务输出'},
+                {field:'recBinlogFilename', hide: true,
+                    templet: function(task){return task.recBinlogFilename?task.recBinlogFilename:""; },
+                    title: 'Binlog文件'},
+                {field:'recBinlogNextPosition', hide: true,
+                    templet: function(task){return task.recBinlogNextPosition?task.recBinlogNextPosition:""; },
+                    title: 'Binlog Next Position'},
+                {field:'createTime', hide: true,
+                    templet: function(task){return task.createTime?task.createTime:""; },
+                    title: '任务创建时间'},
+                {field:'updateTime', hide: true,
+                    templet: function(task){return task.updateTime?task.updateTime:""; },
+                    title: '任务更新时间'},
+
+
+                {fixed: 'right', width: 200, title:'操作', toolbar: '#taskOpBar'}
+            ]  ],
+            done: function(){
+                var id = this.id;
+
+            },
+            error: function(res, msg){
+                console.log(res, msg)
+            }
+        });
+
+        // 工具栏事件
+        table.on('toolbar(taskListTableFilter)', function(obj){
+            var id = obj.config.id;
+            var checkStatus = table.checkStatus(id);
+            var othis = lay(this);
+
+            console.log("obj:" + obj);
+            switch(obj.event){
+                case 'createTaskEvent':
+                    util.openWin({
+                        'url': '/console/task/create',
+                        'target': '_blank'
+                    });
+
+                    break;
+                case 'startTaskEvent':
+
+                    break;
+                case 'stopTaskEvent':
+
+                    break;
+                case 'deleteTaskEvent':
+
+                    break;
+                case 'LAYTABLE_TIPS':
+                    layer.alert('自定义工具栏图标按钮');
+                    break;
+            };
+        });
+
+
+        // 触发单元格工具事件
+        table.on('tool(taskListTableFilter)', function(obj){ // 双击 toolDouble
+            var data = obj.data; // 获得当前行数据
+            switch (obj.event) {
+                case 'startTaskEvent':
+                    startTask(data.uuid, function (obj) {
+                        table.reload('taskListTableId');
+                        layer.alert("任务"+data.uuid+"已启动");
+                    }, function (err) {
+                        layer.alert("任务"+data.uuid+"启动失败");
+                        console.log(err);
+                    });
+                    break;
+                case 'stopTaskEvent':
+                    stopTask(data.uuid, function (obj) {
+                        table.reload('taskListTableId');
+                        layer.alert("任务"+data.uuid+"已停止");
+                    }, function (err) {
+                        layer.alert("任务"+data.uuid+"停止失败");
+                        console.log(err);
+                    });
+                    break;
+                case 'deleteTaskEvent':
+                    deleteTask(data.uuid, function (obj) {
+                        table.reload('taskListTableId');
+                        layer.alert("任务"+data.uuid+"已删除");
+                    }, function (err) {
+                        layer.alert("任务"+data.uuid+"删除失败");
+                        console.log(err);
+                    });
+                    break;
+                case 'detailTaskEvent':
+                    layer.open({
+                        type:1,
+                        area: ['600px','600px'],
+                        content: '#taskDetailLayer'
+                    });
+                    break;
+                case 'moreEvent':
+
+                    dropdown.render({
+                        elem: this, // 触发事件的 DOM 对象
+                        show: true, // 外部事件触发即显示
+                        data: [{
+                            title: '设置同步规则',
+                            id: 'filter'
+                        },{
+                            title: '编辑',
+                            id: 'edit'
+                        },{
+                            title: '详情',
+                            id: 'detail'
+                        },{
+                            title: '删除',
+                            id: 'delete'
+                        }],
+                        click: function(menudata){
+                            if(menudata.id === 'filter'){
+                                // layer.alert('查看操作，当前任务UUID:'+ data.uuid);
+                                util.openWin({
+                                    'url': '/console/filter/list?binlogChannelId='+data.lutaBinlogChannel.id,
+                                    'target': '_blank'
+                                });
+                            } else if(menudata.id === 'edit'){
+                                // layer.alert('查看操作，当前任务UUID:'+ data.uuid);
+                                util.openWin({
+                                    'url': '/console/task/edit?taskUUID='+data.uuid,
+                                    'target': '_blank'
+                                });
+                            }else if(menudata.id === 'detail'){
+                                // layer.alert('查看操作，当前任务UUID:'+ data.uuid);
+                                layer.open({
+                                    type:2,
+                                    area: ['600px','600px'],
+                                    content: '/console/task/detail?taskUUID='+data.uuid
+                                });
+                            } else if(menudata.id === 'delete'){
+                                layer.confirm('真的删除任务UUID: '+ data.uuid +' 吗?', function(index){
+                                    // obj.del(); // 删除对应行（tr）的DOM结构
+                                    layer.close(index);
+                                    // 向服务端发送删除指令
+                                    deleteTask(data.uuid, function (obj) {
+                                        table.reload('taskListTableId');
+                                        layer.alert("任务"+data.uuid+"已删除");
+                                    }, function (err) {
+                                        layer.alert("任务"+data.uuid+"删除失败");
+                                        console.log(err);
+                                    });
+                                });
+                            }
+                        },
+                        align: 'right', // 右对齐弹出
+                        style: 'box-shadow: 1px 1px 10px rgb(0 0 0 / 12%);' // 设置额外样式
+                    })
+
+                    break;
+                default:
+                    break;
+            }
+
+        });
+
+        // 触发表格复选框选择
+        table.on('checkbox(taskListTableFilter)', function(obj){
+            console.log(obj)
+        });
+
+        // 触发表格单选框选择
+        table.on('radio(taskListTableFilter)', function(obj){
+            console.log(obj)
+        });
+
+        // 行单击事件
+        table.on('row(taskListTableFilter)', function(obj){
+            //console.log(obj);
+            //layer.closeAll('tips');
+        });
+        // 行双击事件
+        table.on('rowDouble(taskListTableFilter)', function(obj){
+            console.log(obj);
+        });
+
+        // 单元格编辑事件
+        table.on('edit(taskListTableFilter)', function(obj){
+            var field = obj.field; // 得到字段
+            var value = obj.value; // 得到修改后的值
+            var data = obj.data; // 得到所在行所有键值
+            // 值的校验
+            if(field === 'email'){
+                if(!/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/.test(obj.value)){
+                    layer.tips('输入的邮箱格式不正确，请重新编辑', this, {tips: 1});
+                    return obj.reedit(); // 重新编辑 -- v2.8.0 新增
+                }
+            }
+            // 编辑后续操作，如提交更新请求，以完成真实的数据更新
+            // …
+            layer.msg('编辑成功', {icon: 1});
+
+            // 其他更新操作
+            var update = {};
+            update[field] = value;
+            obj.update(update);
+        });
+    });
+
+</script>
+</body>
+</html>

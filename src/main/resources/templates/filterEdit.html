@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org/">
+<head>
+    <meta charset="UTF-8">
+    <title>编辑同步规则</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" th:href="@{/layui-v2.8.17/layui/css/layui.css}"/>
+    <script type="text/javascript" th:src="@{/layui-v2.8.17/layui/layui.js}"></script>
+
+    <style>
+        table{
+            border-collapse: collapse;
+        }
+        td, th{
+            border: 1px solid;
+        }
+        .luta-container {width: 900px; margin: 21px auto 0;}
+        .luta-border {border: solid 1px #e2e2e2;}
+        .luta-border-right {border-right: solid 1px #e2e2e2;}
+        .luta-border-left {border-left: solid 1px #e2e2e2;}
+        .luta-right-margin { margin-right: 50px;}
+        .luta-right-padding { padding-right: 50px;}
+    </style>
+</head>
+<body>
+
+<div class="luta-container">
+    <form class="layui-form" action="/console/filter/edit" method="post" lay-filter="filter-val-filter">
+        <input hidden type="text" name="id" th:value="${binlogFilter.id}" />
+        <input type="text" name="binlogChannelId" th:value="${binlogFilter.binlogChannelId}" hidden>
+        <div class="layui-form-item">
+            <label class="layui-form-label"><span style="font-weight: bolder">规则名称</span><span style="color: red">*</span></label>
+            <div class="layui-input-block">
+                <input type="text" name="name" th:value="${binlogFilter.name}" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">描述</label>
+            <div class="layui-input-block">
+                <textarea name="description" th:value="${binlogFilter.description}" placeholder="(可选)" class="layui-textarea"></textarea>
+            </div>
+        </div>
+
+
+        <hr>
+        <span style="font-weight: bolder">要同步的数据库表信息</span>
+        <hr>
+        <div class="layui-form-item">
+            <label class="layui-form-label">数据库名</label>
+            <div class="layui-input-block">
+                <input type="radio" name="schemaNameSpecified" value="0" title="全部"  lay-filter="schema-name-radio-filter" th:checked="${not binlogFilter.schemaNameSpecified}">
+                <input type="radio" name="schemaNameSpecified" value="1" title="指定数据库" lay-filter="schema-name-radio-filter" th:checked="${binlogFilter.schemaNameSpecified}">
+            </div>
+        </div>
+        <div id="specify_schema_input_div" th:hidden="${not binlogFilter.schemaNameSpecified}" class="layui-form-item">
+            <label class="layui-form-label"><span style="color: red">*</span></label>
+            <div class="layui-input-block">
+                <input type="text" name="schemaName" th:value="${binlogFilter.schemaName}"  placeholder="（例如: unisetup）" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">表名</label>
+            <div class="layui-input-block">
+                <input type="radio" name="tableNameSpecified" value="0" title="全部" lay-filter="table-name-radio-filter" th:checked="${not binlogFilter.tableNameSpecified}">
+                <input type="radio" name="tableNameSpecified" value="1" title="指定表" lay-filter="table-name-radio-filter" th:checked="${binlogFilter.tableNameSpecified}">
+            </div>
+        </div>
+        <div id="specify_table_input_div" th:hidden="${not binlogFilter.tableNameSpecified}" class="layui-form-item">
+            <label class="layui-form-label"><span style="color: red">*</span></label>
+            <div class="layui-input-block">
+                <textarea name="tableName" th:text="${binlogFilter.tableName}" placeholder="（例如：user。可以多行，每行一个表名）" class="layui-textarea">
+                </textarea>
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">SQL操作</label>
+            <div class="layui-input-block">
+                <input type="checkbox" name="insertIncluded" title="INSERT" lay-skin="primary" th:checked="${binlogFilter.insertIncluded}">
+                <input type="checkbox" name="updateIncluded" title="UPDATE" lay-skin="primary" th:checked="${binlogFilter.updateIncluded}">
+                <input type="checkbox" name="deleteIncluded" title="DELETE" lay-skin="primary" th:checked="${binlogFilter.deleteIncluded}">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">是否同步DDL语句<span style="color: red">*</span></label>
+            <div class="layui-input-block">
+                <input type="radio" name="ddlUpdate" value="1" title="是" th:checked="${binlogFilter.ddlUpdate}">
+                <input type="radio" name="ddlUpdate" value="0" title="否" th:checked="${not binlogFilter.ddlUpdate}">
+            </div>
+        </div>
+
+        <hr>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button type="submit" class="layui-btn" lay-submit>立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+
+    </form>
+
+
+</div>
+
+
+</body>
+
+<script>
+
+var select_remote_mysql_timezone = document.querySelector('#remoteMysqlTimezone');
+if (select_remote_mysql_timezone != null) select_remote_mysql_timezone.value = "UTC";
+
+layui.use(["form", "layer"], function(){
+    var form = layui.form;
+    var layer = layui.layer;
+
+    form.on('radio(schema-name-radio-filter)', function(data){
+        let specify_schema_input_div = document.querySelector('#specify_schema_input_div');
+        if ( parseInt(data.value) === 0){
+            layer.confirm('如果选择全部数据库，那么就不能单独指定表了，确定吗？', function (index) {
+                specify_schema_input_div.hidden = true;
+
+                form.val('filter-val-filter', {"tableNameSpecified": 0});
+
+                let table_name_specified_radios = document.querySelectorAll("input[type='radio'][name='tableNameSpecified']");
+                table_name_specified_radios.forEach(function(element, index){
+                    element.disabled = true;
+                });
+                form.render();
+
+                let specify_table_input_div = document.querySelector('#specify_table_input_div');
+                specify_table_input_div.hidden = true;
+                layer.close(index);
+            }, function (index) {
+                form.val('filter-val-filter', {"schemaNameSpecified": 1});
+                layer.close(index);
+            });
+
+        }else {
+            let table_name_specified_radios = document.querySelectorAll("input[type='radio'][name='tableNameSpecified']");
+            table_name_specified_radios.forEach(function(element, index){
+                element.disabled = false;
+            });
+            form.render();
+
+            specify_schema_input_div.hidden = false;
+        }
+    });
+    form.on('radio(table-name-radio-filter)', function(data){
+        let specify_table_input_div = document.querySelector('#specify_table_input_div');
+        if ( parseInt(data.value) === 0){
+            specify_table_input_div.hidden = true;
+        }else {
+            specify_table_input_div.hidden = false;
+        }
+    });
+
+});
+
+</script>
+
+</html>

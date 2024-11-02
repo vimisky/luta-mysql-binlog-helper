@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>登录</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/layui-v2.8.17/layui/css/layui.css}"/>
+    <script type="text/javascript" th:src="@{/layui-v2.8.17/layui/layui.js}"></script>
+    <style>
+        body{
+            /*background-image: url("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1576686661155&di=979f715560fa7ad316c42b4b15e8d702&imgtype=0&src=http%3A%2F%2F00.minipic.eastday.com%2F20171011%2F20171011134244_ba2764b9a42cd878ce93ab37fd08e3e5_2.jpeg");*/
+            background-position: center center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+        .loginForm{
+            width: 350px;
+            height: 300px;
+            background-color: white;
+            padding: 30px 20px;
+            margin-top: 50%;
+            border-radius: 5px;
+            box-shadow: 0 0 5px black;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+<div class="layui-container">
+    <span hidden th:text="${msg}"></span>
+    <div class="layui-row">
+        <div class="layui-col-md4 layui-col-md-offset4">
+            <div class="loginForm">
+                <h2 align="center">MySQL数据同步工具v1.0 Capture端</h2>
+                <form class="layui-form" action="/console/login" method="post">
+                    <div class="layui-form-item">
+                        <label>用户名:</label>
+                        <div class="layui-form-block">
+                            <input type="text" name="username" required lay-verify="required"
+                                   placeholder="请输入用户名" class="layui-input">
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <label>密码:</label>
+                        <div class="layui-form-block">
+                            <input type="password" name="password" required lay-verify="required"
+                                   placeholder="请输入密码" class="layui-input">
+                        </div>
+                    </div>
+
+                    <div class="layui-form-item">
+                        <div class="layui-form-block">
+                            <button class="layui-btn" lay-submit lay-filter="loginForm">登录</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+    layui.use(['layer', 'form'], function () {
+        var layer = layui.layer;
+        if (getQueryParam("msg"))
+        layer.alert(getQueryParam("msg"), {icon:2});
+    })
+</script>
+</body>
+</html>

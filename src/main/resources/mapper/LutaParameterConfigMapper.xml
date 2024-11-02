@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.github.vimisky.luta.mysql.binlog.helper.dao.LutaParameterConfigMapper">
+    <resultMap id="lutaParameterConfigResultMap" type="io.github.vimisky.luta.mysql.binlog.helper.entity.LutaParameterConfig">
+        <id property="id" column="id" />
+        <result property="name" column="name"/>
+        <result property="key" column="key"/>
+        <result property="value" column="value"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+    <select id="findById" resultMap="lutaParameterConfigResultMap">
+        select `id`, `name`, `key`, `value`,`create_time`,`update_time`
+        from `t_config`
+        where `id` = #{id}
+    </select>
+    <select id="findAll" resultMap="lutaParameterConfigResultMap">
+        select `id`, `name`, `key`, `value`,`create_time`,`update_time`
+        from `t_config`
+    </select>
+    <insert id="insert" useGeneratedKeys="true"
+            keyProperty="id" keyColumn="id">
+        insert into `t_config` (`name`, `key`, `value`,`create_time`,`update_time`)
+        values (#{name}, #{key}, #{value},datetime('now','localtime'),datetime('now','localtime'))
+    </insert>
+    <update id="update">
+        update `t_config` set
+        `name` = #{name},
+        `key` = #{key},
+        `value` = #{value},
+<!--        `create_time` = #{createTime},-->
+        `update_time` = datetime('now','localtime')
+        where id = #{id}
+    </update>
+    <delete id="delete">
+        delete from `t_config` where id = #{id}
+    </delete>
+</mapper>

@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: MySQL数据同步工具v1.0 Capture端
+  profiles:
+    active: dev
+management:
+  health:
+    rabbit:
+      enabled: false

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.github.vimisky.luta.mysql.binlog.helper.dao.LutaBinlogTaskMapper">
+    <resultMap id="lutaBinlogTaskResultMap" type="io.github.vimisky.luta.mysql.binlog.helper.entity.LutaBinlogTask">
+        <id property="id" column="id" />
+        <result property="uuid" column="uuid"/>
+        <result property="binlogChannelId" column="binlog_channel_id"/>
+        <result property="heartbeatTimestamp" column="heartbeat_timestamp"/>
+        <result property="executeNode" column="execute_node"/>
+        <result property="executeStartTime" column="execute_start_time"/>
+        <result property="executeStopTime" column="execute_stop_time"/>
+        <result property="executeStatus" column="execute_status"/>
+        <result property="executeMessage" column="execute_message"/>
+        <result property="lastEventTime" column="last_event_time"/>
+        <result property="lastOutputTrxTime" column="last_output_trx_time"/>
+        <result property="lastOutputTrx" column="last_output_trx"/>
+        <result property="recServerId" column="rec_server_id"/>
+        <result property="recBinlogFilename" column="rec_binlog_filename"/>
+        <result property="recBinlogNextPosition" column="rec_binlog_next_position"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+    <select id="findById" resultMap="lutaBinlogTaskResultMap">
+        select `id`, `uuid`, `binlog_channel_id`,`heartbeat_timestamp`,
+        `execute_node`, `execute_start_time`, `execute_stop_time`,`execute_status`, `execute_message`,`last_event_time`,
+        `last_output_trx_time`,`last_output_trx`,`rec_server_id`,`rec_binlog_filename`, `rec_binlog_next_position`, `create_time`,`update_time`
+        from `t_binlog_task`
+        where `id` = #{id}
+    </select>
+    <select id="findByUuid" resultMap="lutaBinlogTaskResultMap">
+        select `id`, `uuid`, `binlog_channel_id`,`heartbeat_timestamp`,
+        `execute_node`, `execute_start_time`, `execute_stop_time`,`execute_status`, `execute_message`,`last_event_time`,
+        `last_output_trx_time`,`last_output_trx`,`rec_server_id`,`rec_binlog_filename`,`rec_binlog_next_position`,`create_time`,`update_time`
+        from `t_binlog_task`
+        where `uuid` = #{uuid}
+    </select>
+    <select id="findByBinlogChannelId" resultMap="lutaBinlogTaskResultMap">
+        select `id`, `uuid`, `binlog_channel_id`,`heartbeat_timestamp`,
+        `execute_node`, `execute_start_time`, `execute_stop_time`,`execute_status`, `execute_message`,`last_event_time`,
+        `last_output_trx_time`,`last_output_trx`,`rec_server_id`,`rec_binlog_filename`,`rec_binlog_next_position`,`create_time`,`update_time`
+        from `t_binlog_task`
+        where `binlog_channel_id` = #{binlogChannelId}
+    </select>
+    <select id="findAll" resultMap="lutaBinlogTaskResultMap">
+        select `id`, `uuid`, `binlog_channel_id`,`heartbeat_timestamp`,
+        `execute_node`, `execute_start_time`, `execute_stop_time`,`execute_status`, `execute_message`,`last_event_time`,
+        `last_output_trx_time`,`last_output_trx`,`rec_server_id`,`rec_binlog_filename`,`rec_binlog_next_position`,`create_time`,`update_time`
+        from `t_binlog_task`
+    </select>
+    <insert id="insert" useGeneratedKeys="true"
+            keyProperty="id" keyColumn="id">
+        insert into `t_binlog_task` (
+        `uuid`, `binlog_channel_id`,`heartbeat_timestamp`,
+        `execute_node`, `execute_start_time`, `execute_stop_time`,`execute_status`, `execute_message`,`last_event_time`,
+        `last_output_trx_time`,`last_output_trx`,`rec_server_id`,`rec_binlog_filename`,`rec_binlog_next_position`,`create_time`,`update_time`) values (
+        #{uuid}, #{binlogChannelId}, #{heartbeatTimestamp},
+        #{executeNode},#{executeStartTime},#{executeStopTime},#{executeStatus},#{executeMessage},#{lastEventTime},
+        #{lastOutputTrxTime},#{lastOutputTrx},#{recServerId},#{recBinlogFilename},#{recBinlogNextPosition},datetime('now','localtime'),datetime('now','localtime'))
+    </insert>
+    <update id="update">
+        update `t_binlog_task` set
+        `uuid` = #{uuid},
+        `binlog_channel_id` = #{binlogChannelId},
+        `heartbeat_timestamp` = #{heartbeatTimestamp},
+        `execute_node` = #{executeNode},
+        `execute_start_time` = #{executeStartTime},
+        `execute_stop_time` = #{executeStopTime},
+        `execute_status` = #{executeStatus},
+        `execute_message` = #{executeMessage},
+        `last_event_time` = #{lastEventTime},
+        `last_output_trx_time` = #{lastOutputTrxTime},
+        `last_output_trx` = #{lastOutputTrx},
+        `rec_server_id` = #{recServerId},
+        `rec_binlog_filename` = #{recBinlogFilename},
+        `rec_binlog_next_position` = #{recBinlogNextPosition},
+<!--        `create_time` = #{createTime},-->
+<!--        https://www.sqlite.org/lang_datefunc.html-->
+        `update_time` = datetime('now','localtime')
+        where id = #{id}
+    </update>
+    <delete id="delete">
+        delete from `t_binlog_task` where id = #{id}
+    </delete>
+</mapper>

@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org/">
+<head>
+    <meta charset="UTF-8">
+    <title>同步规则列表</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" th:href="@{/layui-v2.8.17/layui/css/layui.css}"/>
+    <script type="text/javascript" th:src="@{/layui-v2.8.17/layui/layui.js}"></script>
+
+    <style>
+        table{
+            border-collapse: collapse;
+        }
+        td, th{
+            border: 1px solid;
+        }
+    </style>
+</head>
+<body>
+
+<div style="padding: 16px;">
+    <table class="layui-hide" id="listTable" lay-filter="listTableFilter"></table>
+</div>
+
+<script type="text/html" id="listToolbar">
+    <div class="layui-btn-container">
+        <button class="layui-btn layui-btn-sm layui-bg-blue" lay-event="createEvent">新建同步规则</button>
+<!--        <button class="layui-btn layui-btn-sm" lay-event="startTaskEvent">启动选中任务</button>-->
+<!--        <button class="layui-btn layui-btn-sm layui-bg-red" lay-event="stopTaskEvent">停止选中任务</button>-->
+<!--        <button class="layui-btn layui-btn-sm layui-bg-orange" lay-event="deleteTaskEvent">删除选中任务</button>-->
+    </div>
+</script>
+<script type="text/html" id="operateBar">
+    <div class="layui-clear-space">
+        <a class="layui-btn layui-btn-xs" lay-event="editEvent">编辑</a>
+        <a class="layui-btn layui-btn-xs layui-bg-blue" lay-event="detailEvent">详情</a>
+        <a class="layui-btn layui-btn-xs layui-bg-red" lay-event="deleteEvent">删除</a>
+<!--        <a class="layui-btn layui-btn-xs layui-bg-red" lay-event="copyEvent">复制</a>-->
+<!--        <a class="layui-btn layui-btn-xs" lay-event="moreEvent">-->
+<!--            更多-->
+<!--            <i class="layui-icon layui-icon-down"></i>-->
+<!--        </a>-->
+    </div>
+</script>
+
+<script>
+
+    function getQueryParam(param) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(param);
+    }
+
+    function copyRow(id, okCallback, failCallback){}
+    function deleteRow(id, okCallback, failCallback){
+        // 创建 XMLHttpRequest，相当于打开浏览器
+        const xhr = new XMLHttpRequest();
+        // 打开一个与网址之间的连接   相当于输入网址
+        // 利用open（）方法，第一个参数是对数据的操作，第二个是接口
+        xhr.open("GET", "/api/filter/remove?id="+id);
+        // 通过连接发送请求  相当于点击回车或者链接
+        xhr.send();
+        // 指定 xhr 状态变化事件处理函数   相当于处理网页呈现后的操作
+        // 全小写
+        xhr.onreadystatechange = function () {
+            // 通过readyState的值来判断获取数据的情况
+            if (this.readyState === XMLHttpRequest.DONE) {
+                // 响应体的文本 responseText
+                console.log(this.responseText);
+                // layer.alert(this.responseText);
+
+                if (this.status == 200){
+                    let responseObj = JSON.parse(this.responseText);
+                    if (responseObj.success){
+                        okCallback(responseObj);
+                    }else {
+                        failCallback(this.responseText);
+                    }
+                }else {
+                    failCallback(this.responseText);
+                }
+            }
+        };
+    }
+
+    layui.use(['table', 'dropdown'], function(){
+        var table = layui.table;
+        var dropdown = layui.dropdown;
+        var layer = layui.layer;
+        var util = layui.util;
+
+        // 创建渲染实例
+        table.render({
+            elem: '#listTable',
+            id: 'listTableId',
+            url: '/api/filter/list',
+            where: {
+                'binlogChannelId': getQueryParam('binlogChannelId')
+            },
+            toolbar: '#listToolbar',
+            // defaultToolbar: ['filter', 'exports', 'print', {
+            //     title: '提示',
+            //     layEvent: 'LAYTABLE_TIPS',
+            //     icon: 'layui-icon-tips'
+            // }],
+            // height: 'full-35', // 最大高度减去其他容器已占有的高度差
+            // cellMinWidth: 10,
+            // lineStyle: 'height: 200px;',
+            page: true,
+            css: [ // 重设当前表格样式
+                '.layui-table-tool-temp{padding-right: 145px;}',
+                // '.layui-table-cell {line-height: 20px !important;vertical-align: middle;height: auto;overflow: visible;text-overflow: inherit;white-space: normal;}',
+                '.layui-table-cell {height: auto ;white-space: normal;word-wrap:break-word;}'
+            ].join(''),
+            cols: [  [
+                {type: 'checkbox'},
+
+                {field:'id',
+                    templet: function(data){return data.id; },
+                    width: 30, title: 'ID'},
+                {field:'name', hide: true,
+                    templet: function(data){return data.name; },
+                    title: '名称'},
+                {field:'description', hide: true,
+                    templet: function(data){return data.description; },
+                    title: '描述'},
+                {field:'schemaName',
+                    templet: function(data){
+                    return data.schemaNameSpecified?data.schemaName:"全部"; },
+                    title: '数据库'},
+
+                {field:'tableName',
+                    templet: function(data){
+                    let ret = "";
+                    if (data.tableNameSpecified){
+                        if (data.tableName != null  ){
+                            if ( data.tableName.length > 35){
+                                ret = data.tableName.substring(0,35) + "...";
+                            }else {
+                                ret  = data.tableName;
+                            }
+                        }
+                    } else {
+                        ret = "全部";
+                    }
+                    return ret;
+
+                    },
+                    title: '表'},
+                {
+                    templet: function(data){
+                    let dmlType = "";
+                    if (data.insertIncluded) dmlType += " <span>INSERT</span> ";
+                    if (data.updateIncluded) dmlType += " <span>UPDATE</span> ";
+                    if (data.deleteIncluded) dmlType += " <span>DELETE</span> ";
+                    return dmlType; },
+                    title: 'SQL操作'},
+                {field:'ddlUpdate',
+                    templet: function(data){return data.ddlUpdate?"是":"否"; },
+                    width: 75, title: 'DDL'},
+
+                {field:'createTime', hide: true,
+                    templet: function(data){return data.createTime?data.createTime:""; },
+                    title: '创建时间'},
+                {field:'updateTime', hide: true,
+                    templet: function(data){return data.updateTime?data.updateTime:""; },
+                    title: '更新时间'},
+
+
+                {fixed: 'right', width: 200, title:'操作', toolbar: '#operateBar'}
+            ]  ],
+            done: function(){
+                var id = this.id;
+
+            },
+            error: function(res, msg){
+                console.log(res, msg)
+            }
+        });
+
+        // 工具栏事件
+        table.on('toolbar(listTableFilter)', function(obj){
+            var id = obj.config.id;
+            var checkStatus = table.checkStatus(id);
+            var othis = lay(this);
+
+            console.log("obj:" + obj);
+            switch(obj.event){
+                case 'createEvent':
+                    util.openWin({
+                        'url': '/console/filter/create?binlogChannelId='+getQueryParam('binlogChannelId'),
+                        'target': '_blank'
+                    });
+
+                    break;
+                case 'LAYTABLE_TIPS':
+                    layer.alert('自定义工具栏图标按钮');
+                    break;
+            };
+        });
+
+
+        // 触发单元格工具事件
+        table.on('tool(listTableFilter)', function(obj){ // 双击 toolDouble
+            var data = obj.data; // 获得当前行数据
+            switch (obj.event) {
+                case 'editEvent':
+                    util.openWin({
+                        'url': '/console/filter/edit?id='+data.id,
+                        'target': '_blank'
+                    });
+                    break;
+                case 'detailEvent':
+                    layer.open({
+                        type:2,
+                        area: ['600px','600px'],
+                        content: '/console/filter/detail?id='+data.id
+                    });
+                    break;
+                case 'deleteEvent':
+                    layer.confirm('真的删除规则: '+ data.id +' 吗？', function(index){
+                        // obj.del(); // 删除对应行（tr）的DOM结构
+                        layer.close(index);
+                        // 向服务端发送删除指令
+                        deleteRow(data.id, function (obj) {
+                            table.reload('listTableId');
+                            layer.alert("同步规则"+data.id+"已删除");
+                        }, function (err) {
+                            layer.alert("同步规则"+data.id+"删除失败");
+                            console.log(err);
+                        });
+                    });
+                    break;
+                case 'copyEvent':
+                    copyRow(data.id, function (obj) {
+                        table.reload('listTableId');
+                        layer.alert("同步规则"+data.id+"已复制");
+                    }, function (err) {
+                        layer.alert("同步规则"+data.id+"复制失败");
+                        console.log(err);
+                    });
+                    break;
+                case 'moreEvent':
+
+                    dropdown.render({
+                        elem: this, // 触发事件的 DOM 对象
+                        show: true, // 外部事件触发即显示
+                        data: [{
+                            title: '详情',
+                            id: 'detail'
+                        },{
+                            title: '删除',
+                            id: 'delete'
+                        }],
+                        click: function(menudata){
+                            if(menudata.id === 'detail'){
+                                // layer.alert('查看操作，当前任务UUID:'+ data.uuid);
+                                layer.open({
+                                    type:2,
+                                    area: ['600px','600px'],
+                                    content: '/console/filter/detail?id='+data.id
+                                });
+                            } else if(menudata.id === 'delete'){
+                                layer.confirm('真的删除规则: '+ data.id +' 么', function(index){
+                                    // obj.del(); // 删除对应行（tr）的DOM结构
+                                    layer.close(index);
+                                    // 向服务端发送删除指令
+                                    deleteRow(data.id, function (obj) {
+                                        table.reload('listTableId');
+                                        layer.alert("同步规则"+data.id+"已删除");
+                                    }, function (err) {
+                                        layer.alert("同步规则"+data.id+"删除失败");
+                                        console.log(err);
+                                    });
+                                });
+                            }
+                        },
+                        align: 'right', // 右对齐弹出
+                        style: 'box-shadow: 1px 1px 10px rgb(0 0 0 / 12%);' // 设置额外样式
+                    })
+
+                    break;
+                default:
+                    break;
+            }
+
+        });
+
+        // 触发表格复选框选择
+        table.on('checkbox(listTableFilter)', function(obj){
+            console.log(obj)
+        });
+
+
+    });
+
+</script>
+</body>
+</html>

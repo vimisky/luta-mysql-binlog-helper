@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.github.vimisky.luta.mysql.binlog.helper.dao.LutaBinlogTaskLogMapper">
+    <resultMap id="lutaBinlogTaskLogResultMap" type="io.github.vimisky.luta.mysql.binlog.helper.entity.LutaBinlogTaskLog">
+        <id property="id" column="id" />
+        <result property="uuid" column="uuid"/>
+        <result property="binlogChannelId" column="binlog_channel_id"/>
+        <result property="binlogChannelContent" column="binlog_channel_content"/>
+        <result property="time" column="time"/>
+        <result property="level" column="level"/>
+        <result property="log" column="log"/>
+    </resultMap>
+    <select id="findById" resultMap="lutaBinlogTaskLogResultMap">
+        select `id`, `uuid`, `binlog_channel_id`,`binlog_channel_content`,
+        `time`, `level`, `log`
+        from `t_binlog_task_log`
+        where `id` = #{id}
+    </select>
+    <select id="findByBinlogChannelId" resultMap="lutaBinlogTaskLogResultMap">
+        select `id`, `uuid`, `binlog_channel_id`,`binlog_channel_content`,
+        `time`, `level`, `log`
+        from `t_binlog_task_log`
+        where `binlog_channel_id` = #{binlogChannelId}
+    </select>
+    <select id="findAll" resultMap="lutaBinlogTaskLogResultMap">
+        select `id`, `uuid`, `binlog_channel_id`,`binlog_channel_content`,
+        `time`, `level`, `log`
+        from `t_binlog_task_log`
+    </select>
+    <insert id="insert" useGeneratedKeys="true"
+            keyProperty="id" keyColumn="id">
+        insert into `t_binlog_task_log` (
+        `uuid`, `binlog_channel_id`,`binlog_channel_content`,
+        `time`, `level`, `log`) values (
+        #{uuid}, #{binlogChannelId}, #{binlogChannelContent},
+        #{time}, #{level}, #{log})
+    </insert>
+    <update id="update">
+        update `t_binlog_task_log` set
+        `uuid` = #{uuid},
+        `binlog_channel_id` = #{binlogChannelId},
+        `binlog_channel_content` = #{binlogChannelContent},
+        `time` = #{time},
+        `level` = #{level},
+        `log` = #{log}
+        where id = #{id}
+    </update>
+    <delete id="delete">
+        delete from `t_binlog_task_log` where id = #{id}
+    </delete>
+</mapper>

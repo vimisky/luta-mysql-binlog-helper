@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org/">
+<head>
+    <meta charset="UTF-8">
+    <title>任务详情</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" th:href="@{/layui-v2.8.17/layui/css/layui.css}"/>
+    <script type="text/javascript" th:src="@{/layui-v2.8.17/layui/layui.js}"></script>
+
+    <style>
+        table{
+            border-collapse: collapse;
+        }
+        td, th{
+            border: 1px solid;
+        }
+    </style>
+</head>
+<body>
+
+<div>
+
+    <table class="layui-table">
+        <tbody>
+
+        <tr>
+            <td>任务ID</td>
+            <td th:text="${taskDetail.uuid}"></td>
+        </tr>
+        <tr>
+            <td>任务名称</td>
+            <td th:text="${taskDetail.lutaBinlogChannel.name}"></td>
+        </tr>
+        <tr>
+            <td>任务描述</td>
+            <td th:text='${taskDetail.lutaBinlogChannel.description}'></td>
+        </tr>
+        <tr>
+            <td>是否运行</td>
+            <td th:text='${taskDetail.executeStatus}'></td>
+        </tr>
+        <tr>
+            <td>运行错误信息</td>
+            <td th:text='${taskDetail.executeMessage}'></td>
+        </tr>
+        <tr>
+            <td>运行节点</td>
+            <td th:text='${taskDetail.executeNode}'></td>
+        </tr>
+        <tr>
+            <td>开始运行时间</td>
+            <td th:text="${#dates.format(taskDetail.executeStartTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+        </tr>
+        <tr>
+            <td>停止运行时间</td>
+            <td th:text="${#dates.format(taskDetail.executeStopTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+        </tr>
+        <tr>
+            <td>心跳时间</td>
+            <td th:text="${#dates.format(taskDetail.heartbeatTimestamp, 'yyyy-MM-dd HH:mm:ss')}"></td>
+        </tr>
+        <tr>
+            <td>上一次BinlogEvent时间</td>
+            <td th:text="${#dates.format(taskDetail.lastEventTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+        </tr>
+        <tr>
+            <td>上一个事务输出时间</td>
+            <td th:text="${#dates.format(taskDetail.lastOutputTrxTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+        </tr>
+        <tr>
+            <td>上一个事务输出</td>
+            <td th:text="${taskDetail.lastOutputTrx}"></td>
+        </tr>
+        <tr>
+            <td>Binlog文件</td>
+            <td th:text='${taskDetail.recBinlogFilename}'></td>
+        </tr>
+        <tr>
+            <td>Binlog Next Position</td>
+            <td th:text='${taskDetail.recBinlogNextPosition}'></td>
+        </tr>
+        <tr>
+            <td>任务创建时间</td>
+            <td th:text="${#dates.format(taskDetail.createTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+        </tr>
+        <tr>
+            <td>任务更新时间</td>
+            <td th:text="${#dates.format(taskDetail.updateTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <hr>
+
+    <table class="layui-table">
+        <tbody>
+
+
+        <tr>
+            <td>MySQL驱动</td>
+            <td th:text="${taskDetail.lutaBinlogChannel.srcDriverClassName}"></td>
+        </tr>
+        <tr>
+            <td>MySQL IP/域名</td>
+            <td th:text="${taskDetail.lutaBinlogChannel.srcHost}"></td>
+        </tr>
+        <tr>
+            <td>MySQL 端口</td>
+            <td th:text="${taskDetail.lutaBinlogChannel.srcPort}"></td>
+        </tr>
+        <tr>
+            <td>MySQL 用户名</td>
+            <td th:text="${taskDetail.lutaBinlogChannel.srcUsername}"></td>
+        </tr>
+        <tr>
+            <td>初始配置的Binlog文件名</td>
+            <td th:text="${taskDetail.lutaBinlogChannel.srcBinlogFilename}"></td>
+        </tr>
+        <tr>
+            <td>初始配置的Binlog文件NextPosition</td>
+            <td th:text="${taskDetail.lutaBinlogChannel.srcBinlogNextPosition}"></td>
+        </tr>
+        <tr>
+            <td>远端MySQL时区</td>
+            <td th:text="${taskDetail.lutaBinlogChannel.remoteMysqlTimezone}"></td>
+        </tr>
+        <tr>
+            <td>RabbitMQ IP/域名</td>
+            <td th:text="${taskDetail.lutaBinlogChannel.dstHost}"></td>
+        </tr>
+        <tr>
+            <td>RabbitMQ 端口</td>
+            <td th:text="${taskDetail.lutaBinlogChannel.dstPort}"></td>
+        </tr>
+        <tr>
+            <td>RabbitMQ vHost</td>
+            <td th:text="${taskDetail.lutaBinlogChannel.dstVhost}"></td>
+        </tr>
+        <tr>
+            <td>RabbitMQ 用户名</td>
+            <td th:text="${taskDetail.lutaBinlogChannel.dstUsername}"></td>
+        </tr>
+        <tr>
+            <td>RabbitMQ Exchange</td>
+            <td th:text="${taskDetail.lutaBinlogChannel.dstTopicName}"></td>
+        </tr>
+        <tr>
+            <td>RabbitMQ RoutingKey</td>
+            <td th:text="${taskDetail.lutaBinlogChannel.dstRoutingKey}"></td>
+        </tr>
+        <tr>
+            <td>配置创建时间</td>
+            <td th:text="${#dates.format(taskDetail.lutaBinlogChannel.createTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+        </tr>
+        <tr>
+            <td>配置更新时间</td>
+            <td th:text="${#dates.format(taskDetail.lutaBinlogChannel.updateTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+
+</div>
+
+
+</body>
+</html>

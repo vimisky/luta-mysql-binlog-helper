@@ -1,0 +1,138 @@
+
+//mysql driver: mysql>=8.0: com.mysql.cj.jdbc.Driver
+//mysql driver: mysql<8.0: com.mysql.jdbc.Driver
+
+//sqlite字段类型仅反映亲和度，动态类型
+//5种字段类型: text, numberic, integer, real, blob
+//亲和度说明：https://www.sqlite.org/datatype3.html#affinity
+//关于Error: duplicate column name报错，手敲一遍就不报错了，应该是复制粘贴过程中出现的问题。
+
+INSERT INTO t_applier_config (name,src_message_queue_type,src_url,src_username,src_password,src_queue_name,dst_driver_class_name,dst_url,dst_username,dst_password,create_time,update_time) VALUES
+	 ('cmpv2_bj2ld',0,'amqp://172.21.232.59:45672/%2Fcmp','ibase','xNsktuosS607sMjO','mysql.queue.unisetup.sync','com.mysql.jdbc.Driver','jdbc:mysql://127.0.0.1:13308/ibase_monitor','datasyncer','sNz5ErPQClnwJEiO',1693397690307,1693397690307);
+
+ALTER TABLE `t_binlog_config` RENAME TO `t_binlog_channel`;
+
+是否同步
+
+mysql-nsp-gg.inserv.xinhua-news.cn.
+30
+A
+172.20.67.112
+
+rabbitmq-nsp-gg.inserv.xinhua-news.cn.
+3600
+A
+172.20.67.109
+
+consul-nsp-gg.inserv.xinhua-news.cn.
+3600
+A
+172.20.67.109
+
+查看所有表定义
+.schema
+查看所有表
+.tables
+--- 删除表
+DROP TABLE `t_binlog_channel`;
+--- 创建表
+CREATE TABLE IF NOT EXISTS `t_binlog_channel` (
+    `id` integer primary key asc autoincrement,
+    `name` text,
+    `description` text,
+    `src_driver_class_name` text,
+    `src_host` text,
+    `src_port` integer,
+    `src_username` text,
+    `src_password` text,
+    `src_binlog_type` integer,
+    `src_binlog_filename` text,
+    `src_binlog_next_position` integer,
+    `src_gtid_next` text,
+    `remote_mysql_timezone` text,
+    `dst_message_queue_type` integer,
+    `dst_host` text,
+    `dst_port` integer,
+    `dst_vhost` text,
+    `dst_username` text,
+    `dst_password` text,
+    `dst_topic_name` text,
+    `dst_routing_key` text,
+    `dst_key` text,
+    `create_time` integer,
+    `update_time` integer
+);
+CREATE TABLE sqlite_sequence(name,seq);
+
+DROP TABLE `t_binlog_filter`;
+CREATE TABLE IF NOT EXISTS `t_binlog_filter` (
+    `id` integer primary key asc autoincrement,
+    `binlog_channel_id` integer,
+    `name` text,
+    `description` text,
+    `is_schema_name_specified` integer,
+    `schema_name` text,
+    `is_table_name_specified` integer,
+    `table_name` text,
+    `is_insert_included` integer,
+    `is_update_included` integer,
+    `is_delete_included` integer,
+    `ddl_update` integer,
+    `create_time` integer,
+    `update_time` integer
+);
+CREATE TABLE `t_config` (
+    `id` integer primary key asc autoincrement,
+    `name` text,
+    `key` text,
+    `value` text,
+    `create_time` integer,
+    `update_time` integer
+);
+DROP TABLE `t_binlog_task`;
+CREATE TABLE IF NOT EXISTS `t_binlog_task` (
+    `id` integer primary key asc autoincrement,
+    `uuid` text,
+    `binlog_channel_id` integer,
+    `heartbeat_timestamp` integer,
+    `execute_node` text,
+    `execute_start_time` integer,
+    `execute_stop_time` integer,
+    `execute_status` integer,
+    `execute_message` text,
+    `last_event_time` integer,
+    `last_output_trx_time` integer,
+    `last_output_trx` text,
+    `rec_server_id` integer,
+    `rec_binlog_filename` text,
+    `rec_binlog_next_position` integer,
+    `create_time` integer,
+    `update_time` integer
+);
+
+不用这种方式，列顺序不能指定
+ALTER TABLE `t_binlog_task` ADD COLUMN  `rec_server_id` integer;
+创建新表，复制数据的方式来添加列
+ALTER TABLE `t_binlog_task` RENAME TO `t_binlog_task_20240508`;
+CREATE TABLE IF NOT EXISTS `t_binlog_task` (...
+INSERT INTO `t_binlog_task` (
+    `id`, `uuid`, `binlog_channel_id`,`heartbeat_timestamp`,
+    `execute_node`, `execute_start_time`, `execute_stop_time`,`execute_status`, `execute_message`,`last_event_time`,
+    `last_output_trx_time`,`last_output_trx`,`rec_binlog_filename`,`rec_binlog_next_position`,`create_time`,`update_time`)
+    SELECT `id`, `uuid`, `binlog_channel_id`,`heartbeat_timestamp`,
+     `execute_node`, `execute_start_time`, `execute_stop_time`,`execute_status`, `execute_message`,`last_event_time`,
+    `last_output_trx_time`,`last_output_trx`,`rec_binlog_filename`,`rec_binlog_next_position`,`create_time`,`update_time`
+    FROM `t_binlog_task_20240508`;
+
+
+
+CREATE TABLE `t_binlog_task_log` (
+    `id` integer primary key asc autoincrement,
+    `uuid` text,
+    `binlog_channel_id` integer,
+    `binlog_channel_content` text,
+    `time` integer,
+    `level` integer,
+    `log` text
+);
+

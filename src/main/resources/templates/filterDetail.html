@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org/">
+<head>
+    <meta charset="UTF-8">
+    <title>同步规则详情</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" th:href="@{/layui-v2.8.17/layui/css/layui.css}"/>
+    <script type="text/javascript" th:src="@{/layui-v2.8.17/layui/layui.js}"></script>
+
+    <style>
+        table{
+            border-collapse: collapse;
+        }
+        td, th{
+            border: 1px solid;
+        }
+    </style>
+</head>
+<body>
+
+<div class="" >
+
+    <table class="layui-table">
+        <tbody>
+
+        <tr>
+            <td>ID</td>
+            <td th:text="${binlogFilter.id}"></td>
+        </tr>
+        <tr>
+            <td>名称</td>
+            <td th:text="${binlogFilter.name}"></td>
+        </tr>
+        <tr>
+            <td>描述</td>
+            <td th:text='${binlogFilter.description}'></td>
+        </tr>
+        <tr>
+            <td>数据库</td>
+            <td th:text="${binlogFilter.schemaNameSpecified}?${binlogFilter.schemaName}:'全部'"></td>
+        </tr>
+        <tr>
+            <td>表</td>
+            <td style="white-space: pre-line" th:text="(${binlogFilter.tableNameSpecified}?${binlogFilter.tableName}:'全部') "></td>
+        </tr>
+        <tr>
+            <td>SQL操作</td>
+            <td th:text="(${binlogFilter.insertIncluded}?' INSERT ':' ') + (${binlogFilter.updateIncluded}?' UPDATE ':' ') + (${binlogFilter.deleteIncluded}?' DELETE ':' ')"></td>
+        </tr>
+        <tr>
+            <td>是否同步DDL</td>
+            <td th:text="${binlogFilter.ddlUpdate}?'是':'否'"></td>
+        </tr>
+
+        <tr>
+            <td>创建时间</td>
+            <td th:text="${#dates.format(binlogFilter.createTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+        </tr>
+        <tr>
+            <td>更新时间</td>
+            <td th:text="${#dates.format(binlogFilter.updateTime, 'yyyy-MM-dd HH:mm:ss')}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+
+</body>
+</html>

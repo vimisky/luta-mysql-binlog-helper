@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.github.vimisky.luta.mysql.binlog.helper.dao.LutaBinlogFilterMapper">
+    <resultMap id="lutaBinlogFilterResultMap" type="io.github.vimisky.luta.mysql.binlog.helper.entity.LutaBinlogFilter">
+        <id property="id" column="id" />
+        <result property="binlogChannelId" column="binlog_channel_id"/>
+        <result property="name" column="name"/>
+        <result property="description" column="description"/>
+        <result property="schemaNameSpecified" column="is_schema_name_specified"/>
+        <result property="schemaName" column="schema_name"/>
+        <result property="tableNameSpecified" column="is_table_name_specified"/>
+        <result property="tableName" column="table_name"/>
+        <result property="insertIncluded" column="is_insert_included"/>
+        <result property="updateIncluded" column="is_update_included"/>
+        <result property="deleteIncluded" column="is_delete_included"/>
+        <result property="ddlUpdate" column="ddl_update"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+    <select id="findById" resultMap="lutaBinlogFilterResultMap">
+        select `id`, `binlog_channel_id`, `name`, `description`, `is_schema_name_specified`, `schema_name`,`is_table_name_specified`,`table_name`, `is_insert_included`, `is_update_included`,`is_delete_included`, `ddl_update`, `create_time`,`update_time`
+        from `t_binlog_filter`
+        where `id` = #{id}
+    </select>
+    <select id="findByBinlogChannelId" resultMap="lutaBinlogFilterResultMap">
+        select `id`, `binlog_channel_id`, `name`, `description`, `is_schema_name_specified`, `schema_name`,`is_table_name_specified`,`table_name`, `is_insert_included`, `is_update_included`,`is_delete_included`,`ddl_update`, `create_time`,`update_time`
+        from `t_binlog_filter`
+        where `binlog_channel_id` = #{binlogChannelId}
+    </select>
+    <select id="findAll" resultMap="lutaBinlogFilterResultMap">
+        select `id`, `binlog_channel_id`, `name`, `description`, `is_schema_name_specified`, `schema_name`,`is_table_name_specified`,`table_name`, `is_insert_included`, `is_update_included`,`is_delete_included`, `ddl_update`, `create_time`,`update_time`
+        from `t_binlog_filter`
+    </select>
+    <insert id="insert" useGeneratedKeys="true"
+            keyProperty="id" keyColumn="id">
+        insert into `t_binlog_filter` (`binlog_channel_id`, `name`, `description`,`is_schema_name_specified`, `schema_name`,`is_table_name_specified`,`table_name`, `is_insert_included`, `is_update_included`,`is_delete_included`, `ddl_update`, `create_time`,`update_time`)
+        values (#{binlogChannelId}, #{name}, #{description},#{schemaNameSpecified}, #{schemaName},#{tableNameSpecified},#{tableName},#{insertIncluded},#{updateIncluded},#{deleteIncluded},#{ddlUpdate},datetime('now','localtime'),datetime('now','localtime'))
+    </insert>
+    <update id="update">
+        update `t_binlog_filter` set
+        `binlog_channel_id` = #{binlogChannelId},
+        `name` = #{name},
+        `description` = #{description},
+        `is_schema_name_specified` = #{schemaNameSpecified},
+        `schema_name` = #{schemaName},
+        `is_table_name_specified` = #{tableNameSpecified},
+        `table_name` = #{tableName},
+        `is_insert_included` = #{insertIncluded},
+        `is_update_included` = #{updateIncluded},
+        `is_delete_included` = #{deleteIncluded},
+        `ddl_update` = #{ddlUpdate},
+<!--        `create_time` = #{createTime},-->
+        `update_time` = datetime('now','localtime')
+        where id = #{id}
+    </update>
+    <delete id="delete">
+        delete from `t_binlog_filter` where id = #{id}
+    </delete>
+</mapper>

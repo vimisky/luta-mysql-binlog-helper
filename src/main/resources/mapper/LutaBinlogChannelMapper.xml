@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.github.vimisky.luta.mysql.binlog.helper.dao.LutaBinlogChannelMapper">
+    <resultMap id="lutaBinlogChannelResultMap" type="io.github.vimisky.luta.mysql.binlog.helper.entity.LutaBinlogChannel">
+        <id property="id" column="id" />
+        <result property="name" column="name"/>
+        <result property="description" column="description"/>
+        <result property="srcDriverClassName" column="src_driver_class_name"/>
+        <result property="srcHost" column="src_host"/>
+        <result property="srcPort" column="src_port"/>
+        <result property="srcUsername" column="src_username"/>
+        <result property="srcPassword" column="src_password"/>
+        <result property="srcBinlogType" column="src_binlog_type"/>
+        <result property="srcBinlogFilename" column="src_binlog_filename"/>
+        <result property="srcBinlogNextPosition" column="src_binlog_next_position"/>
+        <result property="srcGtidNext" column="src_gtid_next"/>
+        <result property="remoteMysqlTimezone" column="remote_mysql_timezone"/>
+        <result property="dstMessageQueueType" column="dst_message_queue_type"/>
+        <result property="dstHost" column="dst_host"/>
+        <result property="dstPort" column="dst_port"/>
+        <result property="dstVhost" column="dst_vhost"/>
+        <result property="dstUsername" column="dst_username"/>
+        <result property="dstPassword" column="dst_password"/>
+        <result property="dstTopicName" column="dst_topic_name"/>
+        <result property="dstRoutingKey" column="dst_routing_key"/>
+        <result property="dstKey" column="dst_key"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+    <select id="findById" resultMap="lutaBinlogChannelResultMap">
+        select `id`, `name`, `description`, `src_driver_class_name`, `src_host`, `src_port`, `src_username`, `src_password`, `src_binlog_type`, `src_binlog_filename`, `src_binlog_next_position`, `src_gtid_next`, `remote_mysql_timezone`,
+        `dst_message_queue_type`, `dst_host`, `dst_port`, `dst_vhost`, `dst_username`, `dst_password`,`dst_topic_name`,`dst_routing_key`,`dst_key`,`create_time`,`update_time`
+        from `t_binlog_channel`
+        where `id` = #{id}
+    </select>
+    <select id="findAll" resultMap="lutaBinlogChannelResultMap">
+        select `id`, `name`, `description`, `src_driver_class_name`, `src_host`, `src_port`, `src_username`, `src_password`, `src_binlog_type`, `src_binlog_filename`, `src_binlog_next_position`, `src_gtid_next`, `remote_mysql_timezone`,
+        `dst_message_queue_type`, `dst_host`, `dst_port`, `dst_vhost`, `dst_username`, `dst_password`,`dst_topic_name`,`dst_routing_key`,`dst_key`,`create_time`,`update_time`
+        from `t_binlog_channel`
+    </select>
+    <insert id="insert" useGeneratedKeys="true"
+            keyProperty="id" keyColumn="id">
+        insert into `t_binlog_channel` (`name`, `description`, `src_driver_class_name`, `src_host`, `src_port`, `src_username`, `src_password`, `src_binlog_type`, `src_binlog_filename`, `src_binlog_next_position`, `src_gtid_next`, `remote_mysql_timezone`,
+        `dst_message_queue_type`, `dst_host`, `dst_port`, `dst_vhost`, `dst_username`, `dst_password`,`dst_topic_name`,`dst_routing_key`,`dst_key`,`create_time`,`update_time`)
+        values (#{name}, #{description}, #{srcDriverClassName}, #{srcHost}, #{srcPort}, #{srcUsername},#{srcPassword},#{srcBinlogType},#{srcBinlogFilename},#{srcBinlogNextPosition},#{srcGtidNext},#{remoteMysqlTimezone},
+        #{dstMessageQueueType},#{dstHost},#{dstPort},#{dstVhost},#{dstUsername},#{dstPassword},#{dstTopicName},#{dstRoutingKey},#{dstKey},datetime('now','localtime'),datetime('now','localtime'))
+    </insert>
+    <update id="update">
+        update `t_binlog_channel` set
+        `name` = #{name},
+        `description` = #{description},
+        `src_driver_class_name` = #{srcDriverClassName},
+        `src_host` = #{srcHost},
+        `src_port` = #{srcPort},
+        `src_username` = #{srcUsername},
+        `src_password` = #{srcPassword},
+        `src_binlog_type` = #{srcBinlogType},
+        `src_binlog_filename` = #{srcBinlogFilename},
+        `src_binlog_next_position` = #{srcBinlogNextPosition},
+        `src_gtid_next` = #{srcGtidNext},
+        `remote_mysql_timezone` = #{remoteMysqlTimezone},
+        `dst_message_queue_type` = #{dstMessageQueueType},
+        `dst_host` = #{dstHost},
+        `dst_port` = #{dstPort},
+        `dst_vhost` = #{dstVhost},
+        `dst_username` = #{dstUsername},
+        `dst_password` = #{dstPassword},
+        `dst_topic_name` = #{dstTopicName},
+        `dst_routing_key` = #{dstRoutingKey},
+        `dst_key` = #{dstKey},
+<!--        `create_time` = #{createTime},-->
+        `update_time` = datetime('now','localtime')
+        where id = #{id}
+    </update>
+    <delete id="delete">
+        delete from `t_binlog_channel` where id = #{id}
+    </delete>
+</mapper>
